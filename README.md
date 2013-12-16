@@ -10,9 +10,9 @@ P-LUPOSDATE supports the RDF query language SPARQL 1.1.
 
 The following programs can be started:
 - HBaseLoader: This program imports triple (in N3 format). The data can be loaded per HBase API (Option 1) or with bulk-load (Option 2), which is recommended, with the following call: 
-  - java -jar hbaseLoader.jar \<path\> \<load-option\> <size of the blocks of HBase triples>
+  - java -jar hbaseLoader.jar \<path\> \<load-option\> \<size of the blocks of HBase triples\>
 - QueryExecuter: This program executes arbitrary SPARQL queries, the paths of which must be given as parameters as well as other parameters like the Bloomfilter application: 
-  - java -jar queryExecuter.jar <number of reduce nodes> <Bloomfilter option: both, first, second> <output of triple set: size or nosize> <path q1> <path q2> ...
+  - java -jar queryExecuter.jar \<number of reduce nodes\> \<Bloomfilter option: both, first, second\> \<output of triple set: size or nosize\> \<path q1\> \<path q2\> ...
 - Start_Demo_Applet_DE: This program starts the LUPOSDATE GUI.
 - SparqlEndpoint: Start of the HTTP SPARQL-Endpoint
 - QuadToN3Converter: Transforms Quads into N3 triples
