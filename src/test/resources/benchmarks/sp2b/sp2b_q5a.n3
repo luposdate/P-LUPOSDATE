@@ -1,0 +1,28 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrc: <http://swrc.ontoware.org/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix bench: <http://localhost/vocabulary/bench/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix person: <http://localhost/persons/> .
+
+<http://localhost/publications/articles/Journal1/1940/Article1> rdf:type bench:Article.
+<http://localhost/publications/articles/Journal2/1940/Article1> rdf:type bench:Article.
+<http://localhost/publications/articles/Journal3/1940/Article1> rdf:type bench:Article.
+
+<http://localhost/publications/articles/Journal1/1940/Article1> dc:creator _:Adamanta_Schlitt.
+<http://localhost/publications/articles/Journal2/1940/Article1> dc:creator _:Bhoomika_Secord.
+<http://localhost/publications/articles/Journal3/1940/Article1> dc:creator _:Editta_Servoss.
+
+<http://localhost/publications/articles/Journal1/1940/Article2> dc:creator _:Adamanta_Schlitt.
+
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> rdf:type bench:Inproceedings.
+<http://localhost/publications/inprocs/Proceeding2/1950/Inproceeding1> rdf:type bench:Inproceedings.
+
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dc:creator _:Adamanta_Schlitt.
+<http://localhost/publications/inprocs/Proceeding2/1950/Inproceeding1> dc:creator _:Bhoomika_Secord.
+
+_:Adamanta_Schlitt foaf:name "Adamanta Schlitt"^^xsd:string.
+_:Bhoomika_Secord foaf:name "Bhoomika Secord"^^xsd:string.

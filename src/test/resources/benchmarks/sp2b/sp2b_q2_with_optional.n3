@@ -1,0 +1,30 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrc: <http://swrc.ontoware.org/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix bench: <http://localhost/vocabulary/bench/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix person: <http://localhost/persons/> .
+bench:Journal rdfs:subClassOf foaf:Document.
+bench:Proceedings rdfs:subClassOf foaf:Document.
+bench:Inproceedings rdfs:subClassOf foaf:Document.
+bench:Article rdfs:subClassOf foaf:Document.
+bench:Www rdfs:subClassOf foaf:Document.
+bench:MastersThesis rdfs:subClassOf foaf:Document.
+bench:PhDThesis rdfs:subClassOf foaf:Document.
+bench:Incollection rdfs:subClassOf foaf:Document.
+bench:Book rdfs:subClassOf foaf:Document.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> rdf:type bench:Inproceedings.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dc:creator _:Bhoomika_Secord.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dc:creator _:Editta_Servoss.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dc:creator <http://localhost/persons/Paul_Erdoes>.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> bench:booktitle "fits vialing lexicons"^^xsd:string.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dc:title "vialing imprisonment vivisects"^^xsd:string.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dcterms:partOf <http://localhost/publications/procs/Proceeding1/1950>.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> rdfs:seeAlso "http://www.summerhouses.tld/lexicons/imprisonment.html"^^xsd:string.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> swrc:pages "47"^^xsd:integer.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> foaf:homepage "http://www.lexicons.tld/vivisects/gipper.html"^^xsd:string.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> dcterms:issued "1950"^^xsd:integer.
+<http://localhost/publications/inprocs/Proceeding1/1950/Inproceeding1> bench:abstract "das ist ein abstract"^^xsd:string.

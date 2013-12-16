@@ -1,0 +1,12 @@
+# Return (up to) 10 electronic edition URLs starting 
+# from the 51th publication, in lexicographical order.
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?ee
+WHERE {
+  ?publication rdfs:seeAlso ?ee
+}
+ORDER BY ?ee
+LIMIT 10
+OFFSET 50
