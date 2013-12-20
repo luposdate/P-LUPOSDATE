@@ -25,9 +25,6 @@ package lupos.cloud.operator.format;
 
 import lupos.cloud.operator.IndexScanContainer;
 import lupos.cloud.operator.MultiIndexScanContainer;
-import lupos.cloud.operator.format.IndexScanCointainerFormatter;
-import lupos.cloud.operator.format.IOperatorFormatter;
-import lupos.cloud.operator.format.CloudSubgraphContainerFormatter;
 import lupos.cloud.pig.PigQuery;
 import lupos.engine.operators.BasicOperator;
 import lupos.engine.operators.OperatorIDTuple;
@@ -49,9 +46,8 @@ public class CloudSubgraphContainerFormatter implements IOperatorFormatter {
 	/* (non-Javadoc)
 	 * @see lupos.cloud.operator.format.IOperatorFormatter#serialize(lupos.engine.operators.BasicOperator, lupos.cloud.pig.PigQuery)
 	 */
-	@Override
-	public PigQuery serialize(final BasicOperator operator, PigQuery pigLatin) {
-		PigQuery result = this.serializeNode(new OperatorIDTuple(operator, 0),
+	public PigQuery serialize(final BasicOperator operator, final PigQuery pigLatin) {
+		final PigQuery result = this.serializeNode(new OperatorIDTuple(operator, 0),
 				pigLatin);
 		pigLatin.finishQuery();
 		return result;
@@ -64,7 +60,7 @@ public class CloudSubgraphContainerFormatter implements IOperatorFormatter {
 	 * @param pigLatin the pig latin
 	 * @return the pig query
 	 */
-	private PigQuery serializeNode(final OperatorIDTuple node, PigQuery pigLatin) {
+	private PigQuery serializeNode(final OperatorIDTuple node, final PigQuery pigLatin) {
 
 		PigQuery result = null;
 		final BasicOperator op = node.getOperator();

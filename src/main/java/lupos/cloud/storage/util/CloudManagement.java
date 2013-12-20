@@ -31,10 +31,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.apache.pig.ExecType;
-import org.apache.pig.PigServer;
-import org.apache.pig.data.Tuple;
-
 import lupos.cloud.bloomfilter.BitvectorManager;
 import lupos.cloud.hbase.HBaseConnection;
 import lupos.cloud.hbase.HBaseDistributionStrategy;
@@ -45,6 +41,10 @@ import lupos.datastructures.items.Variable;
 import lupos.datastructures.items.literal.LiteralFactory;
 import lupos.datastructures.queryresult.QueryResult;
 import lupos.misc.util.ImmutableIterator;
+
+import org.apache.pig.ExecType;
+import org.apache.pig.PigServer;
+import org.apache.pig.data.Tuple;
 
 /**
  * Diese Klasse ist für die Kommunikation mit der Cloud zuständig (sowohl HBase
@@ -88,30 +88,31 @@ public class CloudManagement {
 	 */
 	public CloudManagement() {
 
-		if (TESTING_MODE)
+		if (this.TESTING_MODE) {
 			return;
+		}
 		try {
 			HBaseConnection.init();
 			pigServer = new PigServer(ExecType.MAPREDUCE);
-			for (String tablename : HBaseDistributionStrategy
+			for (final String tablename : HBaseDistributionStrategy
 					.getTableInstance().getTableNames()) {
 				HBaseConnection.createTable(tablename,
 						HBaseDistributionStrategy.getTableInstance()
 								.getColumnFamilyName());
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * Submit h base triple to database.
-	 * 
+	 *
 	 * @param triple
 	 *            the triple
 	 */
 	public void submitHBaseTripleToDatabase(final Collection<HBaseTriple> triple) {
-		for (HBaseTriple item : triple) {
+		for (final HBaseTriple item : triple) {
 			if (countTriple % 1000000 == 0) {
 				if (countTriple != 0) {
 					System.out.println(formatter.format(new Date()).toString()
@@ -123,7 +124,7 @@ public class CloudManagement {
 						item.getColumnFamily(), item.getColumn(),
 						item.getValue());
 				countTriple++;
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -131,26 +132,26 @@ public class CloudManagement {
 
 	/**
 	 * Delete h base triple from database.
-	 * 
+	 *
 	 * @param triple
 	 *            the triple
 	 */
 	public void deleteHBaseTripleFromDatabase(
 			final Collection<HBaseTriple> triple) {
 		try {
-			for (HBaseTriple item : triple) {
+			for (final HBaseTriple item : triple) {
 				HBaseConnection.deleteRow(item.getTablename(),
 						item.getColumnFamily(), item.getRow_key(),
 						item.getColumn());
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * Submit pig query.
-	 * 
+	 *
 	 * @param query
 	 *            the query
 	 * @return the query result
@@ -158,50 +159,50 @@ public class CloudManagement {
 	public QueryResult submitPigQuery(final PigQuery query) {
 
 		QueryResult result = null;
-		long start = System.currentTimeMillis();
+		final long start = System.currentTimeMillis();
 		try {
 			if (bloomfilter_active) {
-				long start2 = System.currentTimeMillis();
+				final long start2 = System.currentTimeMillis();
 				BitvectorManager
 						.generateBitvector(query.getBitvectors(), query);
-				long stop2 = System.currentTimeMillis();
+				final long stop2 = System.currentTimeMillis();
 				System.out.println("Bitvector generated in "
 						+ new DecimalFormat("#.##")
 								.format(((double) stop2 - (double) start2)
-										/ (double) 1000) + "s!");
+										/ 1000) + "s!");
 
-				bitvectorTime = (stop2 - start2) / 1000.0;
+				this.bitvectorTime = (stop2 - start2) / 1000.0;
 			}
-			if (PRINT_PIGLATIN_PROGRAMM) {
+			if (this.PRINT_PIGLATIN_PROGRAMM) {
 				System.out.println("Generated PigLatin Program:");
 				System.out.println(query.getPigLatin());
 				System.out.println();
 			}
 			//
-			if (TESTING_MODE)
+			if (this.TESTING_MODE)
+			 {
 				return null; // testing purpose
+			}
 			System.out.println("PigLatin Programm wird ausgefuehrt...");
 			pigServer.registerQuery(query.getPigLatin());
-			curVariableList = query.getVariableList();
-			pigQueryResult = pigServer.openIterator("X");
+			this.curVariableList = query.getVariableList();
+			this.pigQueryResult = pigServer.openIterator("X");
 			result = new QueryResult();
 			result = QueryResult
 					.createInstance(new ImmutableIterator<Bindings>() {
-						@Override
 						public boolean hasNext() {
-							return pigQueryResult.hasNext();
+							return CloudManagement.this.pigQueryResult.hasNext();
 						}
 
-						@Override
 						public Bindings next() {
 							if (this.hasNext()) {
 								try {
 									final Bindings result = Bindings
 											.createNewInstance();
-									Tuple tuple = pigQueryResult.next();
+									final Tuple tuple = CloudManagement.this.pigQueryResult.next();
 									int i = 0;
-									for (String var : curVariableList) {
-										Object curTupleObject = tuple.get(i);
+									for (final String var : CloudManagement.this.curVariableList) {
+										final Object curTupleObject = tuple.get(i);
 										// unbounded Variables
 										if (curTupleObject == null) {
 											// do nothing
@@ -210,7 +211,7 @@ public class CloudManagement {
 
 										} else {
 
-											String curTupel = curTupleObject
+											final String curTupel = curTupleObject
 													.toString();
 											if (curTupel.toString().startsWith(
 													"<")) {
@@ -229,16 +230,16 @@ public class CloudManagement {
 																								">") + 1)));
 											} else if (curTupel
 													.startsWith("\"")) {
-												String content = curTupel.substring(
+												final String content = curTupel.substring(
 														curTupel.indexOf("\""),
 														curTupel.lastIndexOf("\"") + 1);
-												int startIndex = curTupel
+												final int startIndex = curTupel
 														.indexOf("<");
-												int stopIndex = curTupel
+												final int stopIndex = curTupel
 														.indexOf(">") + 1;
 												if (startIndex != -1
 														&& stopIndex != -1) {
-													String type = curTupel
+													final String type = curTupel
 															.substring(
 																	startIndex,
 																	stopIndex);
@@ -278,7 +279,7 @@ public class CloudManagement {
 										i++;
 									}
 									return result;
-								} catch (Exception e) {
+								} catch (final Exception e) {
 									e.printStackTrace();
 									return null;
 								}
@@ -287,10 +288,10 @@ public class CloudManagement {
 							}
 						}
 					});
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
-		long stop = System.currentTimeMillis();
+		final long stop = System.currentTimeMillis();
 		System.out.println("PigLatin Programm erfolgreich in "
 				+ ((stop - start) / 1000) + "s ausgeführt!");
 		return result;
@@ -305,10 +306,10 @@ public class CloudManagement {
 
 	/**
 	 * Gets the bitvector time.
-	 * 
+	 *
 	 * @return the bitvector time
 	 */
 	public double getBitvectorTime() {
-		return bitvectorTime;
+		return this.bitvectorTime;
 	}
 }

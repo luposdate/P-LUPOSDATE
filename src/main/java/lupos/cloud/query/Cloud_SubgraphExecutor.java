@@ -48,8 +48,7 @@ public class Cloud_SubgraphExecutor implements ICloudSubgraphExecutor {
 	/* (non-Javadoc)
 	 * @see lupos.cloud.operator.ICloudSubgraphExecutor#evaluate(lupos.cloud.pig.PigQuery)
 	 */
-	@Override
-	public QueryResult evaluate(PigQuery cloudSubgraphAsPig) {
+	public QueryResult evaluate(final PigQuery cloudSubgraphAsPig) {
 		return this.cloudManagement.submitPigQuery(cloudSubgraphAsPig);
 	}
 }

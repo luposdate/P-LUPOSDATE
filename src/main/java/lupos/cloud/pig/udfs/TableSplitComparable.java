@@ -34,7 +34,7 @@ import org.apache.hadoop.io.WritableComparable;
  * *** PATCH ***
  * This class allow Pig to order TableSplits. A table split corresponds to a key
  * range (low, high).
- * 
+ *
  * @since Pig 0.9.3
  */
 public class TableSplitComparable implements WritableComparable<TableSplit> {
@@ -44,61 +44,62 @@ public class TableSplitComparable implements WritableComparable<TableSplit> {
 	// need a default constructor to be able to de-serialize using just the
 	// Writable interface
 	public TableSplitComparable() {
-		tsplit = new TableSplit();
+		this.tsplit = new TableSplit();
 	}
 
-	public TableSplitComparable(TableSplit tsplit) {
+	public TableSplitComparable(final TableSplit tsplit) {
 		this.tsplit = tsplit;
 	}
 
-	@Override
-	public void readFields(DataInput in) throws IOException {
-		tsplit.readFields(in);
+	public void readFields(final DataInput in) throws IOException {
+		this.tsplit.readFields(in);
 	}
 
-	@Override
-	public void write(DataOutput out) throws IOException {
-		tsplit.write(out);
+	public void write(final DataOutput out) throws IOException {
+		this.tsplit.write(out);
 	}
 
-	@Override
-	public int compareTo(TableSplit o) {
-		return tsplit.compareTo(o);
+	public int compareTo(final TableSplit o) {
+		return this.tsplit.compareTo(o);
 	}
 
 	@Override
 	public String toString() {
-		return "TableSplitComparable : " + tsplit.toString();
+		return "TableSplitComparable : " + this.tsplit.toString();
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
 	public int hashCode() {
-		return ((tsplit == null) ? 0 : tsplit.hashCode());
+		return ((this.tsplit == null) ? 0 : this.tsplit.hashCode());
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
-		TableSplitComparable other = (TableSplitComparable) obj;
-		if (tsplit == null) {
-			if (other.tsplit != null)
+		}
+		final TableSplitComparable other = (TableSplitComparable) obj;
+		if (this.tsplit == null) {
+			if (other.tsplit != null) {
 				return false;
-		} else if (!tsplit.equals(other.tsplit)) {
+			}
+		} else if (!this.tsplit.equals(other.tsplit)) {
 			return false;
 		}
 		return true;

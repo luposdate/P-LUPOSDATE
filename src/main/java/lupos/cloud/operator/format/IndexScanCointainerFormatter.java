@@ -26,7 +26,6 @@ package lupos.cloud.operator.format;
 import java.util.Collection;
 
 import lupos.cloud.operator.IndexScanContainer;
-import lupos.cloud.operator.format.IOperatorFormatter;
 import lupos.cloud.pig.PigQuery;
 import lupos.cloud.pig.SinglePigQuery;
 import lupos.cloud.pig.operator.PigDistinctOperator;
@@ -54,21 +53,20 @@ import lupos.engine.operators.tripleoperator.TriplePattern;
 public class IndexScanCointainerFormatter implements IOperatorFormatter {
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * luposdate.operators.formatter.OperatorFormatter#serialize(lupos.engine
 	 * .operators.BasicOperator, int)
 	 */
-	@Override
-	public PigQuery serialize(final BasicOperator operator, PigQuery pigQuery) {
-		SinglePigQuery singlePigQuery = new SinglePigQuery();
+	public PigQuery serialize(final BasicOperator operator, final PigQuery pigQuery) {
+		final SinglePigQuery singlePigQuery = new SinglePigQuery();
 		final IndexScanContainer indexScan = (IndexScanContainer) operator;
-		Collection<TriplePattern> tp = indexScan.getIndexScan()
+		final Collection<TriplePattern> tp = indexScan.getIndexScan()
 				.getTriplePattern();
-		PigIndexScanOperator pigIndexScan = new PigIndexScanOperator(tp);
+		final PigIndexScanOperator pigIndexScan = new PigIndexScanOperator(tp);
 		singlePigQuery.setIndexScanOperator(pigIndexScan);
 		singlePigQuery.buildAndAppendQuery(pigIndexScan);
-		for (BasicOperator op : indexScan.getOperators()) {
+		for (final BasicOperator op : indexScan.getOperators()) {
 			if (op instanceof Filter) {
 				singlePigQuery.addContainerFilter(new PigFilterOperator(
 						(Filter) op));
@@ -96,7 +94,7 @@ public class IndexScanCointainerFormatter implements IOperatorFormatter {
 				// muss an sich nicht behandelt werden, da im
 				// IndexScan/TripelMustern die Variablen bereits durch LUPOSDATE
 				// ersetzew werden, jedoch nicht in der Projektion!
-				AddBindingFromOtherVar addVar = (AddBindingFromOtherVar) op;
+				final AddBindingFromOtherVar addVar = (AddBindingFromOtherVar) op;
 				singlePigQuery.replaceVariableInProjection("?"
 						+ addVar.getVar().getName(), "?"
 						+ addVar.getOtherVar().getName());

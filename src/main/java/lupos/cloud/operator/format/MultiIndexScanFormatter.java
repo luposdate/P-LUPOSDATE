@@ -28,7 +28,6 @@ import java.util.LinkedList;
 
 import lupos.cloud.operator.IndexScanContainer;
 import lupos.cloud.operator.MultiIndexScanContainer;
-import lupos.cloud.operator.format.IOperatorFormatter;
 import lupos.cloud.pig.BagInformation;
 import lupos.cloud.pig.PigQuery;
 import lupos.cloud.pig.operator.PigJoinOperator;
@@ -45,13 +44,12 @@ import lupos.engine.operators.multiinput.optional.Optional;
 public class MultiIndexScanFormatter implements IOperatorFormatter {
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * luposdate.operators.formatter.OperatorFormatter#serialize(lupos.engine
 	 * .operators.BasicOperator, int)
 	 */
-	@Override
-	public PigQuery serialize(final BasicOperator operator, PigQuery pigQuery) {
+	public PigQuery serialize(final BasicOperator operator, final PigQuery pigQuery) {
 		final MultiIndexScanContainer multiIndexScanContainer = (MultiIndexScanContainer) operator;
 		this.joinMultiIndexScans(multiIndexScanContainer, pigQuery);
 		return pigQuery;
@@ -59,7 +57,7 @@ public class MultiIndexScanFormatter implements IOperatorFormatter {
 
 	/**
 	 * Join multi index scans.
-	 * 
+	 *
 	 * @param container
 	 *            the container
 	 * @param pigQuery
@@ -67,13 +65,13 @@ public class MultiIndexScanFormatter implements IOperatorFormatter {
 	 * @return the join information
 	 */
 	public BagInformation joinMultiIndexScans(
-			MultiIndexScanContainer container, PigQuery pigQuery) {
+			final MultiIndexScanContainer container, final PigQuery pigQuery) {
 		BagInformation newJoin = null;
-		for (Integer id : container.getContainerList().keySet()) {
-			LinkedList<BasicOperator> curList = container.getContainerList()
+		for (final Integer id : container.getContainerList().keySet()) {
+			final LinkedList<BasicOperator> curList = container.getContainerList()
 					.get(id);
-			ArrayList<BagInformation> multiInputist = new ArrayList<BagInformation>();
-			for (BasicOperator op : curList) {
+			final ArrayList<BagInformation> multiInputist = new ArrayList<BagInformation>();
+			for (final BasicOperator op : curList) {
 				if (op instanceof IndexScanContainer) {
 					new IndexScanCointainerFormatter().serialize(op, pigQuery);
 					multiInputist.add(pigQuery.getLastAddedBag());
@@ -105,16 +103,16 @@ public class MultiIndexScanFormatter implements IOperatorFormatter {
 			}
 
 			int i = 0;
-			for (BagInformation toRemove : multiInputist) {
+			for (final BagInformation toRemove : multiInputist) {
 				newJoin.addAppliedFilters(toRemove.getAppliedFilters());
 				pigQuery.removeIntermediateBags(toRemove);
 
 				if (isJoin || i == 0) {
-					for (String var : toRemove.getBitVectors().keySet()) {
+					for (final String var : toRemove.getBitVectors().keySet()) {
 						newJoin.addBitvector(var, toRemove.getBitVector(var));
 					}
 				} else {
-					for (String var : toRemove.getBitVectors().keySet()) {
+					for (final String var : toRemove.getBitVectors().keySet()) {
 						newJoin.mergeBitVecor(var, toRemove.getBitVector(var));
 					}
 				}

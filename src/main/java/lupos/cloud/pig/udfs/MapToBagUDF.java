@@ -130,7 +130,6 @@ public class MapToBagUDF extends EvalFunc<DataBag> implements OrderedLoadFunc {
 		return result;
 	}
 
-	@Override
 	public WritableComparable<?> getSplitComparable(final InputSplit split)
 			throws IOException {
 		return null;

@@ -935,7 +935,6 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 	 * @see org.apache.pig.StoreFuncInterface#getOutputFormat()
 	 */
 
-	@Override
 	public OutputFormat getOutputFormat() throws IOException {
 		if (this.outputFormat == null) {
 			if (this.m_conf == null) {
@@ -949,7 +948,6 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 		return this.outputFormat;
 	}
 
-	@Override
 	public void checkSchema(final ResourceSchema s) throws IOException {
 		if (!(this.caster_ instanceof LoadStoreCaster)) {
 			LOG.error("Caster must implement LoadStoreCaster for writing to HBase.");
@@ -962,7 +960,6 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 
 	// Suppressing unchecked warnings for RecordWriter, which is not
 	// parameterized by StoreFuncInterface
-	@Override
 	public void prepareToWrite(@SuppressWarnings("rawtypes") final RecordWriter writer)
 			throws IOException {
 		this.writer = writer;
@@ -971,7 +968,6 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 	// Suppressing unchecked warnings for RecordWriter, which is not
 	// parameterized by StoreFuncInterface
 	@SuppressWarnings("unchecked")
-	@Override
 	public void putNext(final Tuple t) throws IOException {
 		final ResourceFieldSchema[] fieldSchemas = (this.schema_ == null) ? null : this.schema_
 				.getFields();
@@ -1092,18 +1088,15 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 		}
 	}
 
-	@Override
 	public String relToAbsPathForStoreLocation(final String location, final Path curDir)
 			throws IOException {
 		return location;
 	}
 
-	@Override
 	public void setStoreFuncUDFContextSignature(final String signature) {
 		this.contextSignature = signature;
 	}
 
-	@Override
 	public void setStoreLocation(final String location, final Job job) throws IOException {
 		if (location.startsWith("hbase://")) {
 			job.getConfiguration().set(TableOutputFormat.OUTPUT_TABLE,
@@ -1129,11 +1122,9 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 		this.addHBaseDelegationToken(this.m_conf, job);
 	}
 
-	@Override
 	public void cleanupOnFailure(final String location, final Job job) throws IOException {
 	}
 
-	@Override
 	public void cleanupOnSuccess(final String location, final Job job) throws IOException {
 	}
 
@@ -1141,12 +1132,10 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 	 * LoadPushDown Methods.
 	 */
 
-	@Override
 	public List<OperatorSet> getFeatures() {
 		return Arrays.asList(LoadPushDown.OperatorSet.PROJECTION);
 	}
 
-	@Override
 	public RequiredFieldResponse pushProjection(
 			final RequiredFieldList requiredFieldList) throws FrontendException {
 		final List<RequiredField> requiredFields = requiredFieldList.getFields();
@@ -1215,23 +1204,19 @@ public class HBaseLoadUDF extends LoadFunc implements StoreFuncInterface,
 		return new RequiredFieldResponse(true);
 	}
 
-	@Override
 	public WritableComparable<InputSplit> getSplitComparable(final InputSplit split)
 			throws IOException {
 		return new WritableComparable<InputSplit>() {
 			TableSplit tsplit = new TableSplit();
 
-			@Override
 			public void readFields(final DataInput in) throws IOException {
 				this.tsplit.readFields(in);
 			}
 
-			@Override
 			public void write(final DataOutput out) throws IOException {
 				this.tsplit.write(out);
 			}
 
-			@Override
 			public int compareTo(final InputSplit split) {
 				return this.tsplit.compareTo((TableSplit) split);
 			}
