@@ -29,6 +29,7 @@ import java.util.Collection;
 import lupos.cloud.hbase.HBaseDistributionStrategy;
 import lupos.cloud.hbase.HBaseTriple;
 import lupos.cloud.storage.util.CloudManagement;
+import lupos.datastructures.bindings.BindingsFactory;
 import lupos.datastructures.items.Triple;
 import lupos.datastructures.queryresult.QueryResult;
 import lupos.distributed.storage.nodistributionstrategy.BlockUpdatesStorage;
@@ -57,9 +58,9 @@ public class Storage_Cloud extends BlockUpdatesStorage {
 	 *
 	 * @return single instance of Storage_Cloud
 	 */
-	public static Storage_Cloud getInstance() {
+	public static Storage_Cloud getInstance(final BindingsFactory bindingsFactory) {
 		if (storageInstance == null) {
-			storageInstance = new Storage_Cloud();
+			storageInstance = new Storage_Cloud(bindingsFactory);
 		}
 		return storageInstance;
 	}
@@ -67,7 +68,8 @@ public class Storage_Cloud extends BlockUpdatesStorage {
 	/**
 	 * Constructor: The clooud management is initialized.
 	 */
-	public Storage_Cloud() {
+	public Storage_Cloud(final BindingsFactory bindingsFactory) {
+		super(bindingsFactory);
 		this.cloudManagement = new CloudManagement();
 	}
 
@@ -77,7 +79,7 @@ public class Storage_Cloud extends BlockUpdatesStorage {
 	 * @return the cloud management
 	 */
 	public CloudManagement getCloudManagement() {
-		return cloudManagement;
+		return this.cloudManagement;
 	}
 
 	/* (non-Javadoc)
@@ -139,11 +141,12 @@ public class Storage_Cloud extends BlockUpdatesStorage {
 	 */
 	public static Collection<HBaseTriple> buildInputHBaseTriple(
 			final Collection<Triple> toBeAdded) {
-		ArrayList<HBaseTriple> hbaseTripleList = new ArrayList<HBaseTriple>();
-		for (Triple triple : toBeAdded) {
-			for (HBaseTriple ht : HBaseDistributionStrategy.getTableInstance()
-					.generateIndecesTriple(triple))
+		final ArrayList<HBaseTriple> hbaseTripleList = new ArrayList<HBaseTriple>();
+		for (final Triple triple : toBeAdded) {
+			for (final HBaseTriple ht : HBaseDistributionStrategy.getTableInstance()
+					.generateIndecesTriple(triple)) {
 				hbaseTripleList.add(ht);
+			}
 		}
 		return hbaseTripleList;
 	}

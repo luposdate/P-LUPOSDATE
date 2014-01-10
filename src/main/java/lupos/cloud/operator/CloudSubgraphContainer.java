@@ -25,10 +25,12 @@ package lupos.cloud.operator;
 
 import lupos.cloud.operator.format.CloudSubgraphContainerFormatter;
 import lupos.cloud.pig.PigQuery;
+import lupos.datastructures.bindings.BindingsFactory;
 import lupos.datastructures.queryresult.QueryResult;
 import lupos.engine.operators.RootChild;
 import lupos.engine.operators.index.Dataset;
 import lupos.engine.operators.index.Root;
+import lupos.engine.operators.messages.BindingsFactoryMessage;
 import lupos.engine.operators.messages.BoundVariablesMessage;
 import lupos.engine.operators.messages.Message;
 import lupos.rdf.Prefix;
@@ -36,7 +38,7 @@ import lupos.rdf.Prefix;
 /**
  * This container contains all operators that shall be send to a the cloud for
  * execution.
- * 
+ *
  */
 public class CloudSubgraphContainer extends RootChild {
 
@@ -48,6 +50,8 @@ public class CloudSubgraphContainer extends RootChild {
 	 */
 	private final Root rootNodeOfSubGraph;
 
+	private BindingsFactory bindingsFactory;
+
 	/**
 	 * the executor to submit a subgraph and retrieve its query result...
 	 */
@@ -55,7 +59,7 @@ public class CloudSubgraphContainer extends RootChild {
 
 	/**
 	 * Instantiates a new sub graph container.
-	 * 
+	 *
 	 * @param rootNodeOfSubGraph
 	 *            the root node of sub graph
 	 * @param subgraphExecutor
@@ -67,14 +71,20 @@ public class CloudSubgraphContainer extends RootChild {
 		this.cloudSubgraphExecutor = subgraphExecutor;
 	}
 
+	@Override
+	public Message preProcessMessage(final BindingsFactoryMessage msg){
+		this.bindingsFactory = msg.getBindingsFactory();
+		return msg;
+	}
+
 	/**
 	 * Gets called when the operator is to be executed. When called this method
 	 * sends the sub graph to the responsible nodes for execution and waits for
 	 * the result to return.
-	 * 
+	 *
 	 * @param dataset
 	 *            the data set
-	 * 
+	 *
 	 * @return the result of the query execution
 	 */
 	@Override
@@ -82,15 +92,14 @@ public class CloudSubgraphContainer extends RootChild {
 		final CloudSubgraphContainerFormatter pigParser = new CloudSubgraphContainerFormatter();
 		final PigQuery pigQuery = pigParser.serialize(this.rootNodeOfSubGraph,
 				new PigQuery());
-		final QueryResult result = this.cloudSubgraphExecutor
-				.evaluate(pigQuery);
+		final QueryResult result = this.cloudSubgraphExecutor.evaluate(pigQuery, this.bindingsFactory);
 		// result.materialize();
 		return result;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.engine.operators.BasicOperator#toString(lupos.rdf.Prefix)
 	 */
 	@Override
@@ -100,7 +109,7 @@ public class CloudSubgraphContainer extends RootChild {
 
 	/**
 	 * Gets the root of subgraph.
-	 * 
+	 *
 	 * @return the root of subgraph
 	 */
 	public Root getRootOfSubgraph() {
@@ -109,7 +118,7 @@ public class CloudSubgraphContainer extends RootChild {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * lupos.engine.operators.BasicOperator#preProcessMessage(lupos.engine.operators
 	 * .messages.BoundVariablesMessage)
@@ -123,12 +132,12 @@ public class CloudSubgraphContainer extends RootChild {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.engine.operators.BasicOperator#toString()
 	 */
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder();
+		final StringBuilder result = new StringBuilder();
 		result.append("--- Cloud SubgraphContainer ---\n");
 		return result.toString();
 	}

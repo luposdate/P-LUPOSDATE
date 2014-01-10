@@ -37,6 +37,7 @@ import lupos.cloud.hbase.HBaseDistributionStrategy;
 import lupos.cloud.hbase.HBaseTriple;
 import lupos.cloud.pig.PigQuery;
 import lupos.datastructures.bindings.Bindings;
+import lupos.datastructures.bindings.BindingsFactory;
 import lupos.datastructures.items.Variable;
 import lupos.datastructures.items.literal.LiteralFactory;
 import lupos.datastructures.queryresult.QueryResult;
@@ -156,7 +157,7 @@ public class CloudManagement {
 	 *            the query
 	 * @return the query result
 	 */
-	public QueryResult submitPigQuery(final PigQuery query) {
+	public QueryResult submitPigQuery(final PigQuery query, final BindingsFactory bindingsFactory) {
 
 		QueryResult result = null;
 		final long start = System.currentTimeMillis();
@@ -197,8 +198,7 @@ public class CloudManagement {
 						public Bindings next() {
 							if (this.hasNext()) {
 								try {
-									final Bindings result = Bindings
-											.createNewInstance();
+									final Bindings result = bindingsFactory.createInstance();
 									final Tuple tuple = CloudManagement.this.pigQueryResult.next();
 									int i = 0;
 									for (final String var : CloudManagement.this.curVariableList) {

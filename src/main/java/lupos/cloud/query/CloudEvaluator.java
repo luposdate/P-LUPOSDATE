@@ -28,15 +28,15 @@ import java.util.List;
 
 import lupos.cloud.operator.ICloudSubgraphExecutor;
 import lupos.cloud.optimizations.logical.rules.AddMultiISContainerRule;
-import lupos.cloud.optimizations.logical.rules.CloudRulePackage;
 import lupos.cloud.optimizations.logical.rules.AddSubGraphContainerRule;
-import lupos.distributed.query.operator.histogramsubmission.IHistogramExecutor;
+import lupos.cloud.optimizations.logical.rules.CloudRulePackage;
 import lupos.cloud.storage.Storage_Cloud;
 import lupos.cloud.storage.util.CloudManagement;
 import lupos.datastructures.bindings.Bindings;
 import lupos.datastructures.bindings.BindingsMap;
 import lupos.datastructures.items.literal.LiteralFactory;
 import lupos.distributed.query.QueryClient;
+import lupos.distributed.query.operator.histogramsubmission.IHistogramExecutor;
 import lupos.distributed.storage.IStorage;
 import lupos.engine.operators.index.BasicIndexScan;
 import lupos.misc.debug.BasicOperatorByteArray;
@@ -53,33 +53,35 @@ public class CloudEvaluator extends QueryClient {
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @throws Exception
 	 *             the exception
 	 */
 	public CloudEvaluator() throws Exception {
-		this(Storage_Cloud.getInstance(), Storage_Cloud.getInstance()
+		// BindingsFactory in Storage_Cloud will be set in the constructor of QueryClient
+		this(Storage_Cloud.getInstance(null), Storage_Cloud.getInstance(null)
 				.getCloudManagement(), new Cloud_SubgraphExecutor(Storage_Cloud
-				.getInstance().getCloudManagement()));
+				.getInstance(null).getCloudManagement()));
 	}
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @param args
 	 *            the args
 	 * @throws Exception
 	 *             the exception
 	 */
 	public CloudEvaluator(final String[] args) throws Exception {
-		this(Storage_Cloud.getInstance(), Storage_Cloud.getInstance()
+		// BindingsFactory in Storage_Cloud will be set in the constructor of QueryClient
+		this(Storage_Cloud.getInstance(null), Storage_Cloud.getInstance(null)
 				.getCloudManagement(), new Cloud_SubgraphExecutor(Storage_Cloud
-				.getInstance().getCloudManagement()), args);
+				.getInstance(null).getCloudManagement()), args);
 	}
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @param storage
 	 *            the storage
 	 * @param cloudManagement
@@ -97,7 +99,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @param storage
 	 *            the storage
 	 * @param histogramExecutor
@@ -119,7 +121,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @param storage
 	 *            the storage
 	 * @param cloudManagement
@@ -140,7 +142,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/**
 	 * Instantiates a new cloud evaluator.
-	 * 
+	 *
 	 * @param storage
 	 *            the storage
 	 * @param histogramExecutor
@@ -165,7 +167,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.distributed.query.QueryClient#initOptimization()
 	 */
 	@Override
@@ -188,7 +190,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * lupos.engine.evaluators.BasicIndexQueryEvaluator#logicalOptimization()
 	 */
@@ -209,7 +211,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.engine.evaluators.BasicIndexQueryEvaluator#
 	 * logicalOptimizationDebugByteArray(lupos.rdf.Prefix)
 	 */
@@ -235,7 +237,7 @@ public class CloudEvaluator extends QueryClient {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.engine.evaluators.BasicIndexQueryEvaluator#init()
 	 */
 	@Override
@@ -247,10 +249,10 @@ public class CloudEvaluator extends QueryClient {
 	}
 
 	public void shutdown() {
-		Storage_Cloud.getInstance().getCloudManagement().shutdown();
+		Storage_Cloud.getInstance(this.bindingsFactory).getCloudManagement().shutdown();
 	}
 
 	public CloudManagement getCloudManagement() {
-		return Storage_Cloud.getInstance().getCloudManagement();
+		return Storage_Cloud.getInstance(this.bindingsFactory).getCloudManagement();
 	}
 }
