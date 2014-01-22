@@ -35,8 +35,7 @@ import lupos.gui.Demo_Applet;
 public class Start_Demo_Applet_DE {
 
 	public static void main(final String[] args) throws ClassNotFoundException {
-		Demo_Applet.registerEvaluator("Cloud SubGraph Evaluator",
-				CloudEvaluator.class);
+		Demo_Applet.registerEvaluator("Cloud SubGraph Evaluator", CloudEvaluator.class);
 		Demo_Applet.main(args);
 	}
 }

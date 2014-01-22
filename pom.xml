@@ -107,6 +107,11 @@
 			<artifactId>luposdate.endpoint</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>de.uniluebeck.ifis</groupId>
+			<artifactId>luposdate.gui</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
 
 		<!-- Hadoop Laptop -->
 
