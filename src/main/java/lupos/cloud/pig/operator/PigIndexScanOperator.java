@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import lupos.cloud.bloomfilter.BitvectorManager;
 import lupos.cloud.bloomfilter.CloudBitvector;
 import lupos.cloud.hbase.HBaseDistributionStrategy;
@@ -36,6 +34,8 @@ import lupos.cloud.pig.BagInformation;
 import lupos.cloud.storage.util.CloudManagement;
 import lupos.datastructures.items.Variable;
 import lupos.engine.operators.tripleoperator.TriplePattern;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 /**
  * Überführt Luposdate IndexScan-Operator in PigLatin-Programm.
@@ -56,18 +56,18 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Instantiates a new pig index scan operator.
-	 * 
+	 *
 	 * @param tp
 	 *            the tp
 	 */
-	public PigIndexScanOperator(Collection<TriplePattern> tp) {
+	public PigIndexScanOperator(final Collection<TriplePattern> tp) {
 		this.triplePatternCollection = tp;
 	}
 
 	/**
 	 * Mit dieser Methode wird das PigLatin-Programm langsam aufgebaut indem die
 	 * einzelnen Tripel-Muster hinzugefügt werden.
-	 * 
+	 *
 	 * @param intermediateBags
 	 *            the intermediate bags
 	 * @param debug
@@ -76,13 +76,13 @@ public class PigIndexScanOperator implements IPigOperator {
 	 *            the filter ops
 	 * @return the string
 	 */
-	public String buildQuery(ArrayList<BagInformation> intermediateBags,
-			boolean debug, ArrayList<PigFilterOperator> filterOps) {
+	public String buildQuery(final ArrayList<BagInformation> intermediateBags,
+			final boolean debug, final ArrayList<PigFilterOperator> filterOps) {
 		this.intermediateJoins = intermediateBags;
 		this.debug = debug;
-		StringBuilder result = new StringBuilder();
-		for (TriplePattern triplePattern : this.triplePatternCollection) {
-			BagInformation curPattern = getHBaseTable(triplePattern);
+		final StringBuilder result = new StringBuilder();
+		for (final TriplePattern triplePattern : this.triplePatternCollection) {
+			final BagInformation curPattern = this.getHBaseTable(triplePattern);
 
 			if (debug) {
 				result.append("-- TriplePattern: " + triplePattern.toN3String()
@@ -117,7 +117,7 @@ public class PigIndexScanOperator implements IPigOperator {
 				}
 
 				result.append(") as (rowkey:chararray, columncontent_"
-						+ tripleCounter + ":map[]");
+						+ this.tripleCounter + ":map[]");
 				if (CloudManagement.bloomfilter_active) {
 					result.append(", bloomfilter1:bytearray, bloomfilter2:bytearray");
 				}
@@ -140,14 +140,14 @@ public class PigIndexScanOperator implements IPigOperator {
 				 * Für alle anderen Triplepattern wird in den jeweiligen
 				 * Tabellen gesucht und nur das Ergebniss (der Spaltenname)
 				 * zurückgegeben.
-				 * 
+				 *
 				 * Anmerkung bzgl Bitvektoren: Statt den Pfad des jeweiligen
 				 * Bitvektor wird ein Platzhalter (SHA 512 HEX Wert) eingesetzt.
 				 * Dieser Platzhalter wird später bei der Bitvektorberechnung
 				 * durch den tatsächlichen Pfad ersetzt. Der Hash wird
 				 * folgendermaßen berechnet:
-				 * 
-				 * h(x) = 
+				 *
+				 * h(x) =
 				 */
 				"PATTERN_"
 						+ curPattern.getPatternId()
@@ -176,7 +176,7 @@ public class PigIndexScanOperator implements IPigOperator {
 									.toString() + "'"));
 				}
 
-				result.append(") as (columncontent_" + tripleCounter + ":map[]");
+				result.append(") as (columncontent_" + this.tripleCounter + ":map[]");
 				if (CloudManagement.bloomfilter_active) {
 					result.append(((curPattern.getBagElements().size() == 1) ? ", bloomfilter1:bytearray"
 							: ", bloomfilter1:bytearray, bloomfilter2:bytearray"));
@@ -194,13 +194,13 @@ public class PigIndexScanOperator implements IPigOperator {
 
 				result.append(")) as "
 						+ ((curPattern.getBagElements().size() == 1) ? "(output"
-								+ tripleCounter + ":chararray);"
-								: "(output1_" + tripleCounter
+								+ this.tripleCounter + ":chararray);"
+								: "(output1_" + this.tripleCounter
 										+ ":chararray, output2_"
-										+ tripleCounter + ":chararray); ")
+										+ this.tripleCounter + ":chararray); ")
 						+ "\n");
 			}
-			intermediateJoins.add(curPattern);
+			this.intermediateJoins.add(curPattern);
 
 			// add bitvector
 			if ((curPattern.getBagElements().size() == 1)) {
@@ -241,62 +241,62 @@ public class PigIndexScanOperator implements IPigOperator {
 			if (debug) {
 				result.append("\n");
 			}
-			tripleCounter++;
+			this.tripleCounter++;
 		}
 		return result.toString();
 	}
 
 	/**
 	 * Gibt für ein Tripel-Muster die korrespondierende HBase Tabelle zurück.
-	 * 
+	 *
 	 * @param triplePattern
 	 *            the triple pattern
 	 * @return the h base table
 	 */
-	private BagInformation getHBaseTable(TriplePattern triplePattern) {
-		int subject = triplePattern.getSubject().getClass() == Variable.class ? 1
+	private BagInformation getHBaseTable(final TriplePattern triplePattern) {
+		final int subject = triplePattern.getSubject().getClass() == Variable.class ? 1
 				: 0;
-		int predicate = triplePattern.getPredicate().getClass() == Variable.class ? 10
+		final int predicate = triplePattern.getPredicate().getClass() == Variable.class ? 10
 				: 0;
-		int object = triplePattern.getObject().getClass() == Variable.class ? 100
+		final int object = triplePattern.getObject().getClass() == Variable.class ? 100
 				: 0;
 
 		BagInformation result = null;
 		switch (subject + predicate + object) {
 		case 110:
-			result = new BagInformation(triplePattern, "S_PO",
+			result = new BagInformation(triplePattern, "s_po",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 101:
-			result = new BagInformation(triplePattern, "P_SO",
+			result = new BagInformation(triplePattern, "p_so",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 11:
-			result = new BagInformation(triplePattern, "O_SP",
+			result = new BagInformation(triplePattern, "o_sp",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 100:
-			result = new BagInformation(triplePattern, "SP_O",
+			result = new BagInformation(triplePattern, "sp_o",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 10:
-			result = new BagInformation(triplePattern, "SO_P",
+			result = new BagInformation(triplePattern, "so_p",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 1:
-			result = new BagInformation(triplePattern, "PO_S",
+			result = new BagInformation(triplePattern, "po_s",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 111:
 			// Wenn alles Variablen sind kann eine beliebige Tabelle verwendet
 			// werden, hier wird S_PO genommen
-			result = new BagInformation(triplePattern, "S_PO",
+			result = new BagInformation(triplePattern, "s_po",
 					"INTERMEDIATE_BAG_");
 			break;
 		case 0:
 			// Wenn alles Literale sind kann eine beliebige Tabelle verwendet
 			// werden, hier wird SO_P genommen
-			result = new BagInformation(triplePattern, "SO_P",
+			result = new BagInformation(triplePattern, "so_p",
 					"INTERMEDIATE_BAG_");
 			break;
 		default:
@@ -312,13 +312,13 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Multi join over two variables.
-	 * 
+	 *
 	 * @return the string
 	 */
 	public String multiJoinOverTwoVariables() {
-		StringBuilder result = new StringBuilder();
+		final StringBuilder result = new StringBuilder();
 		HashSet<String> equalVariables = null;
-		HashSet<BagInformation> toJoin = new HashSet<BagInformation>();
+		final HashSet<BagInformation> toJoin = new HashSet<BagInformation>();
 		boolean found = false;
 
 		/*
@@ -326,8 +326,8 @@ public class PigIndexScanOperator implements IPigOperator {
 		 * vorkommt. Für die Join-Mengen wird dann ein PigLatin Join ausgegeben
 		 * und die Join-Mengen werden zu einer vereinigt.
 		 */
-		for (BagInformation curJoin1 : intermediateJoins) {
-			HashSet<String> variables1 = new HashSet<String>();
+		for (final BagInformation curJoin1 : this.intermediateJoins) {
+			final HashSet<String> variables1 = new HashSet<String>();
 
 			// alle Mengen die weniger als 2 variablen haben sind für diesen
 			// Fall nicht interessant
@@ -336,13 +336,13 @@ public class PigIndexScanOperator implements IPigOperator {
 			}
 
 			// Füge alle Variablen dem Set hinzu
-			for (String var : curJoin1.getVariables()) {
+			for (final String var : curJoin1.getVariables()) {
 				variables1.add(var);
 			}
 
 			// Finde eine Menge die die selben Variablen hat
-			for (BagInformation curJoin2 : intermediateJoins) {
-				HashSet<String> variables2 = new HashSet<String>();
+			for (final BagInformation curJoin2 : this.intermediateJoins) {
+				final HashSet<String> variables2 = new HashSet<String>();
 
 				// Die neue Menge darf nicht die selbe seine wie die erste und
 				// muss auch mehr als eine Variable haben
@@ -353,14 +353,14 @@ public class PigIndexScanOperator implements IPigOperator {
 				}
 
 				// Füge alle Variablen dem Set hinzu
-				for (String var : curJoin2.getVariables()) {
+				for (final String var : curJoin2.getVariables()) {
 					variables2.add(var);
 				}
 
 				// Vergleiche Set1 mit Set2 und speicher selbe Variablen ab
-				HashSet<String> tmpEqualVariables = new HashSet<String>();
-				for (String entry1 : variables1) {
-					for (String entry2 : variables2) {
+				final HashSet<String> tmpEqualVariables = new HashSet<String>();
+				for (final String entry1 : variables1) {
+					for (final String entry2 : variables2) {
 						if (entry1.equals(entry2)) {
 							tmpEqualVariables.add(entry1);
 						}
@@ -380,12 +380,12 @@ public class PigIndexScanOperator implements IPigOperator {
 		if (!found) {
 			return null;
 		}
-		result.append(getPigMultiJoinWith2Columns(
+		result.append(this.getPigMultiJoinWith2Columns(
 				new ArrayList<BagInformation>(toJoin), new ArrayList<String>(
 						equalVariables)));
 
-		for (BagInformation toRemove : toJoin) {
-			intermediateJoins.remove(toRemove);
+		for (final BagInformation toRemove : toJoin) {
+			this.intermediateJoins.remove(toRemove);
 		}
 		// this.joinVariables.remove(variableToJoin);
 		return result.toString();
@@ -393,40 +393,40 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Multi join over one variable.
-	 * 
+	 *
 	 * @return the string
 	 */
 	public String multiJoinOverOneVariable() {
-		StringBuilder result = new StringBuilder();
+		final StringBuilder result = new StringBuilder();
 		ArrayList<BagInformation> joinAliases = null;
-		ArrayList<ArrayList<BagInformation>> joinCandidates = new ArrayList<ArrayList<BagInformation>>();
-		ArrayList<String> joinVariablesCandidates = new ArrayList<String>();
+		final ArrayList<ArrayList<BagInformation>> joinCandidates = new ArrayList<ArrayList<BagInformation>>();
+		final ArrayList<String> joinVariablesCandidates = new ArrayList<String>();
 
 		/*
 		 * Es wird die Join-Menge gesucht bei dem eine Variable am häufigsten
 		 * vorkommt. Für die Join-Mengen wird dann ein PigLatin Join ausgegeben
 		 * und die Join-Mengen werden zu einer vereinigt.
 		 */
-		for (BagInformation curJoin : intermediateJoins) {
+		for (final BagInformation curJoin : this.intermediateJoins) {
 			boolean found = false;
 			String joinVariable = "";
 			joinAliases = new ArrayList<BagInformation>();
 			// JoinInformation curJoin = intermediateJoins.get(0);
 			joinAliases.add(curJoin);
-			for (int i = 0; i < intermediateJoins.size(); i++) {
-				if (intermediateJoins.get(i).equals(curJoin)) {
+			for (int i = 0; i < this.intermediateJoins.size(); i++) {
+				if (this.intermediateJoins.get(i).equals(curJoin)) {
 					continue;
 				}
 				for (String variable1 : curJoin.getBagElements()) {
 					if (found) {
 						variable1 = joinVariable;
 					}
-					for (String variable2 : intermediateJoins.get(i)
+					for (final String variable2 : this.intermediateJoins.get(i)
 							.getBagElements()) {
 						if (variable1.equals(variable2)) {
 							found = true;
 							joinVariable = variable1;
-							joinAliases.add(intermediateJoins.get(i));
+							joinAliases.add(this.intermediateJoins.get(i));
 							break;
 						}
 					}
@@ -444,7 +444,7 @@ public class PigIndexScanOperator implements IPigOperator {
 		ArrayList<BagInformation> patternToJoin = joinCandidates.get(0);
 		String variableToJoin = joinVariablesCandidates.get(0);
 		int i = 0;
-		for (ArrayList<BagInformation> curCandidate : joinCandidates) {
+		for (final ArrayList<BagInformation> curCandidate : joinCandidates) {
 			if (curCandidate.size() > patternToJoin.size()) {
 				patternToJoin = curCandidate;
 				variableToJoin = joinVariablesCandidates.get(i);
@@ -452,10 +452,10 @@ public class PigIndexScanOperator implements IPigOperator {
 			i++;
 		}
 
-		result.append(getPigMultiJoin(patternToJoin, variableToJoin));
+		result.append(this.getPigMultiJoin(patternToJoin, variableToJoin));
 
-		for (BagInformation toRemove : patternToJoin) {
-			intermediateJoins.remove(toRemove);
+		for (final BagInformation toRemove : patternToJoin) {
+			this.intermediateJoins.remove(toRemove);
 		}
 		// this.joinVariables.remove(variableToJoin);
 		return result.toString();
@@ -463,35 +463,35 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Joint mehrere Mengen über ein Element (Ausgabe als PigLatin Programm).
-	 * 
+	 *
 	 * @param joinOverItem
 	 *            the join over item
 	 * @param joinElement
 	 *            the join element
 	 * @return the pig multi join
 	 */
-	public String getPigMultiJoin(ArrayList<BagInformation> joinOverItem,
-			String joinElement) {
-		StringBuilder result = new StringBuilder();
+	public String getPigMultiJoin(final ArrayList<BagInformation> joinOverItem,
+			final String joinElement) {
+		final StringBuilder result = new StringBuilder();
 
-		for (BagInformation bag : joinOverItem) {
+		for (final BagInformation bag : joinOverItem) {
 			if (bag.isVariableOptional(joinElement)) {
 				throw new RuntimeException(
 						"Join over optional variable is not allowed in pig!");
 			}
 		}
 
-		if (debug) {
+		if (this.debug) {
 			result.append("-- Join over " + joinElement.toString() + "\n");
 		}
 
-		BagInformation curJoinInfo = new BagInformation("INTERMEDIATE_BAG_"
+		final BagInformation curJoinInfo = new BagInformation("INTERMEDIATE_BAG_"
 				+ BagInformation.idCounter);
 		result.append(curJoinInfo.getName() + " = JOIN");
 		int i = 0;
-		for (BagInformation curPattern : joinOverItem) {
+		for (final BagInformation curPattern : joinOverItem) {
 			i++;
-			for (String s : curPattern.getBagElements()) {
+			for (final String s : curPattern.getBagElements()) {
 				curJoinInfo.getBagElements().add(s);
 			}
 			result.append(" " + curPattern.getName() + " BY $"
@@ -506,7 +506,7 @@ public class PigIndexScanOperator implements IPigOperator {
 				result.append(";\n");
 			}
 
-			for (String elem : curPattern.getOptionalJoinElements()) {
+			for (final String elem : curPattern.getOptionalJoinElements()) {
 				curJoinInfo.addOptionalElements(elem);
 			}
 			curJoinInfo.addBitVectors(curPattern.getBitVectors());
@@ -515,8 +515,8 @@ public class PigIndexScanOperator implements IPigOperator {
 		curJoinInfo.addAppliedFilters(BagInformation
 				.mergeAppliedFilters(joinOverItem));
 
-		result.append(removeDuplicatedAliases(curJoinInfo));
-		intermediateJoins.add(curJoinInfo);
+		result.append(this.removeDuplicatedAliases(curJoinInfo));
+		this.intermediateJoins.add(curJoinInfo);
 		BagInformation.idCounter++;
 
 		return result.toString();
@@ -524,7 +524,7 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Gets the pig multi join with2 columns.
-	 * 
+	 *
 	 * @param joinOverItem
 	 *            the join over item
 	 * @param joinElements
@@ -532,12 +532,12 @@ public class PigIndexScanOperator implements IPigOperator {
 	 * @return the pig multi join with2 columns
 	 */
 	public String getPigMultiJoinWith2Columns(
-			ArrayList<BagInformation> joinOverItem,
-			ArrayList<String> joinElements) {
-		StringBuilder result = new StringBuilder();
+			final ArrayList<BagInformation> joinOverItem,
+			final ArrayList<String> joinElements) {
+		final StringBuilder result = new StringBuilder();
 
-		for (String var : joinElements) {
-			for (BagInformation bag : joinOverItem) {
+		for (final String var : joinElements) {
+			for (final BagInformation bag : joinOverItem) {
 				if (bag.isVariableOptional(var)) {
 					throw new RuntimeException(
 							"Join over optional variable is not allowed in pig!");
@@ -545,18 +545,18 @@ public class PigIndexScanOperator implements IPigOperator {
 			}
 		}
 
-		if (debug) {
+		if (this.debug) {
 			result.append("-- Join over " + joinElements.toString() + "\n");
 		}
 
-		BagInformation curJoinInfo = new BagInformation("INTERMEDIATE_BAG_"
+		final BagInformation curJoinInfo = new BagInformation("INTERMEDIATE_BAG_"
 				+ BagInformation.idCounter);
 
 		result.append(curJoinInfo.getName() + " = JOIN");
 		int i = 0;
-		for (BagInformation curPattern : joinOverItem) {
+		for (final BagInformation curPattern : joinOverItem) {
 			i++;
-			for (String s : curPattern.getBagElements()) {
+			for (final String s : curPattern.getBagElements()) {
 				curJoinInfo.getBagElements().add(s);
 			}
 			result.append(" " + curPattern.getName() + " BY ($"
@@ -568,7 +568,7 @@ public class PigIndexScanOperator implements IPigOperator {
 				result.append(";\n");
 			}
 
-			for (String elem : curPattern.getOptionalJoinElements()) {
+			for (final String elem : curPattern.getOptionalJoinElements()) {
 				curJoinInfo.addOptionalElements(elem);
 			}
 
@@ -579,8 +579,8 @@ public class PigIndexScanOperator implements IPigOperator {
 		curJoinInfo.addAppliedFilters(BagInformation
 				.mergeAppliedFilters(joinOverItem));
 
-		result.append(removeDuplicatedAliases(curJoinInfo));
-		intermediateJoins.add(curJoinInfo);
+		result.append(this.removeDuplicatedAliases(curJoinInfo));
+		this.intermediateJoins.add(curJoinInfo);
 		BagInformation.idCounter++;
 
 		return result.toString();
@@ -588,23 +588,23 @@ public class PigIndexScanOperator implements IPigOperator {
 
 	/**
 	 * Gets the final alias.
-	 * 
+	 *
 	 * @return the final alias
 	 */
 	public String getFinalAlias() {
-		return intermediateJoins.get(0).getName();
+		return this.intermediateJoins.get(0).getName();
 	}
 
 	// hat keinen Vorteil gebracht
 	/**
 	 * Removes the duplicated aliases.
-	 * 
+	 *
 	 * @param oldJoin
 	 *            the old join
 	 * @return the string
 	 */
 	@Deprecated
-	public String removeDuplicatedAliases(BagInformation oldJoin) {
+	public String removeDuplicatedAliases(final BagInformation oldJoin) {
 		return "";
 		// StringBuilder result = new StringBuilder();
 		// // prüfe ob es doppelte Aliases gibt und entferne diese

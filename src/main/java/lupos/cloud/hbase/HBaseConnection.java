@@ -99,7 +99,7 @@ public class HBaseConnection {
 	static FileSystem hdfs_fileSystem = null;
 
 	/** Wenn diese Variable True ist, ist der BulkLoad-Modus aktiv. */
-	public static boolean MAP_REDUCE_BULK_LOAD = false;
+	public static boolean MAP_REDUCE_BULK_LOAD = true;
 
 	/** Wenn aktiv, werden die HBase-Tabellen beim Start gelöscht. */
 	public static boolean deleteTableOnCreation = false;
@@ -107,7 +107,7 @@ public class HBaseConnection {
 	/**
 	 * Initialisierung der Verbindung und erstellen der Arbeitsverzeichnisse auf
 	 * dem verteilten Dateisystem.
-	 * 
+	 *
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
@@ -118,7 +118,7 @@ public class HBaseConnection {
 			admin = new HBaseAdmin(configuration);
 			System.out
 					.print("Verbindung zum Cluster wurde hergestellt. Knoten: ");
-			for (ServerName serv : admin.getClusterStatus().getServers()) {
+			for (final ServerName serv : admin.getClusterStatus().getServers()) {
 				System.out.print(serv.getHostname() + " ");
 			}
 			System.out.println();
@@ -139,7 +139,7 @@ public class HBaseConnection {
 	/**
 	 * Erzeugt für jeden Index eine Tabelle und erstellt die Column-Families +
 	 * aktiviert LZO Komprimierung.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param familyname
@@ -147,19 +147,19 @@ public class HBaseConnection {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void createTable(String tablename, String familyname)
+	public static void createTable(final String tablename, final String familyname)
 			throws IOException {
 		init();
 		try {
 			if (deleteTableOnCreation) {
 				deleteTable(tablename);
 			}
-			HTableDescriptor descriptor = new HTableDescriptor(
+			final HTableDescriptor descriptor = new HTableDescriptor(
 					Bytes.toBytes(tablename));
-			HColumnDescriptor family = new HColumnDescriptor(familyname);
-			HColumnDescriptor familyb1 = new HColumnDescriptor(
+			final HColumnDescriptor family = new HColumnDescriptor(familyname);
+			final HColumnDescriptor familyb1 = new HColumnDescriptor(
 					BitvectorManager.bloomfilter1ColumnFamily);
-			HColumnDescriptor familyb2 = new HColumnDescriptor(
+			final HColumnDescriptor familyb2 = new HColumnDescriptor(
 					BitvectorManager.bloomfilter2ColumnFamily);
 			family.setCompressionType(Algorithm.LZO);
 			familyb1.setCompressionType(Algorithm.LZO);
@@ -172,7 +172,7 @@ public class HBaseConnection {
 				System.out.println("Tabelle \"" + tablename
 						+ "\" wurde erzeugt");
 			}
-		} catch (TableExistsException e) {
+		} catch (final TableExistsException e) {
 			if (message) {
 				System.out.println("Tabelle \"" + tablename
 						+ "\" existiert bereits!");
@@ -183,7 +183,7 @@ public class HBaseConnection {
 	/**
 	 * Die Tripel in dem lokalen TripelCache werden in HBase geladen (nur für
 	 * den BulkLoad).
-	 * 
+	 *
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
@@ -195,7 +195,7 @@ public class HBaseConnection {
 
 	/**
 	 * Fügt eine Spalte zu einer Tabelle hinzu.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param columnname
@@ -203,11 +203,12 @@ public class HBaseConnection {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void addColumn(String tablename, String columnname)
+	public static void addColumn(final String tablename, final String columnname)
 			throws IOException {
 		init();
-		if (!checkTable(tablename))
+		if (!checkTable(tablename)) {
 			return;
+		}
 
 		admin.addColumn(tablename, new HColumnDescriptor(columnname));
 		if (message) {
@@ -219,7 +220,7 @@ public class HBaseConnection {
 
 	/**
 	 * Entfernt ein HBase Triple.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param columnFamily
@@ -231,15 +232,15 @@ public class HBaseConnection {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void deleteRow(String tablename, String columnFamily,
-			String rowKey, String colunmnname) throws IOException {
+	public static void deleteRow(final String tablename, final String columnFamily,
+			final String rowKey, final String colunmnname) throws IOException {
 		init();
 		HTable table = hTables.get(tablename);
 		if (table == null) {
 			table = new HTable(configuration, tablename);
 			hTables.put(tablename, table);
 		}
-		Delete row = new Delete(rowKey.getBytes());
+		final Delete row = new Delete(rowKey.getBytes());
 		row.deleteColumn(columnFamily.getBytes(), colunmnname.getBytes());
 		table.delete(row);
 		if (message) {
@@ -250,16 +251,17 @@ public class HBaseConnection {
 
 	/**
 	 * Deaktivieren einer Tabelle.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void disableTable(String tablename) throws IOException {
+	public static void disableTable(final String tablename) throws IOException {
 		init();
-		if (!checkTable(tablename))
+		if (!checkTable(tablename)) {
 			return;
+		}
 
 		admin.disableTable(tablename);
 		if (message) {
@@ -270,16 +272,17 @@ public class HBaseConnection {
 
 	/**
 	 * Aktivieren einer Tabelle.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void enableTable(String tablename) throws IOException {
+	public static void enableTable(final String tablename) throws IOException {
 		init();
-		if (!checkTable(tablename))
+		if (!checkTable(tablename)) {
 			return;
+		}
 
 		admin.enableTable(tablename);
 		if (message) {
@@ -290,20 +293,21 @@ public class HBaseConnection {
 	/**
 	 * Löschen einer Tabelle. Dazu wird sie erste deaktiviert und anschließend
 	 * gelöscht.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void deleteTable(String tablename) throws IOException {
+	public static void deleteTable(final String tablename) throws IOException {
 		init();
-		if (!checkTable(tablename))
+		if (!checkTable(tablename)) {
 			return;
+		}
 
 		try {
 			admin.disableTable(tablename);
-		} catch (TableNotEnabledException e) {
+		} catch (final TableNotEnabledException e) {
 			// ignore
 		}
 		admin.deleteTable(tablename);
@@ -314,29 +318,29 @@ public class HBaseConnection {
 
 	/**
 	 * Gibt alle Tabellen zurück.
-	 * 
+	 *
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void listAllTables() throws IOException {
 		init();
-		HTableDescriptor[] list = admin.listTables();
+		final HTableDescriptor[] list = admin.listTables();
 		System.out.println("Tabellen (Anzahl = " + list.length + "):");
-		for (HTableDescriptor table : list) {
+		for (final HTableDescriptor table : list) {
 			System.out.println(table.toString());
 		}
 	}
 
 	/**
 	 * Prüft ob eine Tabelle verfügbar ist.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @return true, if successful
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static boolean checkTable(String tablename) throws IOException {
+	public static boolean checkTable(final String tablename) throws IOException {
 		init();
 		if (!admin.isTableAvailable(tablename)) {
 			System.out
@@ -348,7 +352,7 @@ public class HBaseConnection {
 
 	/**
 	 * Fügt eine Reihe (=row) hinzu.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param row_key
@@ -362,8 +366,8 @@ public class HBaseConnection {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void addRow(String tablename, String row_key,
-			String columnFamily, String column, String value)
+	public static void addRow(final String tablename, final String row_key,
+			final String columnFamily, final String column, final String value)
 			throws IOException {
 		// schnellere Variante zum einlesen von Tripel
 		if (MAP_REDUCE_BULK_LOAD) {
@@ -373,7 +377,7 @@ public class HBaseConnection {
 								+ BUFFER_FILE_NAME + ".csv"), '\t'));
 			}
 			// Schreibe die Zeile in auf den Festplattenpuffer
-			String[] entries = { columnFamily, row_key, column, value };
+			final String[] entries = { columnFamily, row_key, column, value };
 			csvwriter.get(tablename).writeNext(entries);
 			rowCounter++;
 
@@ -389,11 +393,11 @@ public class HBaseConnection {
 				table = new HTable(configuration, tablename);
 				hTables.put(tablename, table);
 			}
-			Put row = new Put(Bytes.toBytes(row_key));
+			final Put row = new Put(Bytes.toBytes(row_key));
 			row.add(Bytes.toBytes(columnFamily), Bytes.toBytes(column),
 					Bytes.toBytes(value));
 
-			String toSplit = column;
+			final String toSplit = column;
 			String elem1 = null;
 			String elem2 = null;
 			if (toSplit.contains(",")) {
@@ -405,13 +409,13 @@ public class HBaseConnection {
 			}
 			// Bloomfilter
 			if (!(elem1 == null)) {
-				Integer position = BitvectorManager.hash(elem1.getBytes());
+				final Integer position = BitvectorManager.hash(elem1.getBytes());
 				row.add(BitvectorManager.bloomfilter1ColumnFamily,
 						integerToByteArray(4, position), Bytes.toBytes(""));
 			}
 
 			if (!(elem2 == null)) {
-				Integer position = BitvectorManager.hash(elem2.getBytes());
+				final Integer position = BitvectorManager.hash(elem2.getBytes());
 				row.add(BitvectorManager.bloomfilter2ColumnFamily,
 						integerToByteArray(4, position), Bytes.toBytes(""));
 			}
@@ -423,33 +427,33 @@ public class HBaseConnection {
 
 	/**
 	 * Integer to byte array.
-	 * 
+	 *
 	 * @param allocate
 	 *            the allocate
 	 * @param pos
 	 *            the pos
 	 * @return the byte[]
 	 */
-	public static byte[] integerToByteArray(int allocate, Integer pos) {
+	public static byte[] integerToByteArray(final int allocate, final Integer pos) {
 		return ByteBuffer.allocate(allocate).putInt(pos).array();
 	}
 
 	/**
 	 * Start bulk load.
-	 * 
+	 *
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
 	public static void startBulkLoad() throws IOException {
 		rowCounter = 0;
-		ArrayList<BulkLoad> bulkList = new ArrayList<BulkLoad>();
-		for (String key : csvwriter.keySet()) {
+		final ArrayList<BulkLoad> bulkList = new ArrayList<BulkLoad>();
+		for (final String key : csvwriter.keySet()) {
 			csvwriter.get(key).close();
 			hdfs_fileSystem.copyFromLocalFile(true, true, new Path(WORKING_DIR
 					+ File.separator + key + "_" + BUFFER_FILE_NAME + ".csv"),
 					new Path("/tmp/" + WORKING_DIR + "/" + key + "_"
 							+ BUFFER_FILE_NAME + ".csv"));
-			BulkLoad b = new BulkLoad(key);
+			final BulkLoad b = new BulkLoad(key);
 			b.start();
 			bulkList.add(b);
 		}
@@ -458,7 +462,7 @@ public class HBaseConnection {
 		boolean allJobsReady = false;
 		while (!allJobsReady) {
 			allJobsReady = true;
-			for (BulkLoad b : bulkList) {
+			for (final BulkLoad b : bulkList) {
 				if (!b.isFinished()) {
 					allJobsReady = false;
 				}
@@ -474,21 +478,21 @@ public class HBaseConnection {
 
 	/**
 	 * Wait.
-	 * 
+	 *
 	 * @param sec
 	 *            the sec
 	 */
-	public static void wait(int sec) {
+	public static void wait(final int sec) {
 		try {
 			Thread.sleep(sec * 1000);
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
 	 * Gibt eine Zeile anhand des rowKeys zurück.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param row_key
@@ -503,12 +507,12 @@ public class HBaseConnection {
 				table = new HTable(configuration, tablename);
 				hTables.put(tablename, table);
 			}
-			Get g = new Get(Bytes.toBytes(row_key));
-			Result result = table.get(g);
+			final Get g = new Get(Bytes.toBytes(row_key));
+			final Result result = table.get(g);
 			if (result != null) {
 				return result;
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -516,7 +520,7 @@ public class HBaseConnection {
 
 	/**
 	 * Gibt eine Zeile anhand des rowkeys und den Prefix einer Spalte zurück.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @param row_key
@@ -534,14 +538,14 @@ public class HBaseConnection {
 				table = new HTable(configuration, tablename);
 				hTables.put(tablename, table);
 			}
-			Get g = new Get(Bytes.toBytes(row_key));
+			final Get g = new Get(Bytes.toBytes(row_key));
 			g.addFamily(cf.getBytes());
 			// g.setFilter(new ColumnPrefixFilter(column.getBytes()));
-			Result result = table.get(g);
+			final Result result = table.get(g);
 			if (result != null) {
 				return result;
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -549,18 +553,18 @@ public class HBaseConnection {
 
 	/**
 	 * Gibt eine Tabelle aus.
-	 * 
+	 *
 	 * @param tablename
 	 *            the tablename
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public static void printTable(String tablename) throws IOException {
+	public static void printTable(final String tablename) throws IOException {
 		init();
-		HTable table = new HTable(configuration, tablename);
-		ResultScanner scanner = table.getScanner(new Scan());
+		final HTable table = new HTable(configuration, tablename);
+		final ResultScanner scanner = table.getScanner(new Scan());
 		try {
-			for (Result scannerResult : scanner) {
+			for (final Result scannerResult : scanner) {
 				System.out.println("row_key: " + scannerResult.getRow());
 
 			}
@@ -572,7 +576,7 @@ public class HBaseConnection {
 
 	/**
 	 * Gibt das Konfigurationsobjekt zurück.
-	 * 
+	 *
 	 * @return the configuration
 	 */
 	public static Configuration getConfiguration() {
@@ -581,7 +585,7 @@ public class HBaseConnection {
 
 	/**
 	 * Gets the hdfs_file system.
-	 * 
+	 *
 	 * @return the hdfs_file system
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.

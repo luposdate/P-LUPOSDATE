@@ -46,84 +46,91 @@ public class HexaDistributionTableStrategy extends HBaseDistributionStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.cloud.hbase.HBaseDistributionStrategy#getTableNames()
 	 */
+	@Override
 	public String[] getTableNames() {
-		String[] result = { "S_PO", "P_SO", "O_SP", "SP_O", "SO_P", "PO_S" };
+		final String[] result = { "s_po", "p_so", "o_sp", "sp_o", "so_p", "po_s" };
 		return result;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * lupos.cloud.hbase.HBaseDistributionStrategy#generateIndecesTriple(lupos
 	 * .datastructures.items.Triple)
 	 */
+	@Override
 	public Collection<HBaseTriple> generateIndecesTriple(final Triple triple) {
-		ArrayList<HBaseTriple> result = new ArrayList<HBaseTriple>();
-		for (String tablename : getTableNames()) {
-			String row_key_string = tablename.substring(0,
+		final ArrayList<HBaseTriple> result = new ArrayList<HBaseTriple>();
+		for (final String tablename : this.getTableNames()) {
+			final String row_key_string = tablename.substring(0,
 					tablename.indexOf("_"));
-			String column_name_string = tablename.substring(
+			final String column_name_string = tablename.substring(
 					tablename.indexOf("_") + 1, tablename.length());
 
 			String row_key = "";
 			boolean first = true;
-			for (Integer key : getInputValue(row_key_string, triple).keySet()) {
+			for (final Integer key : this.getInputValue(row_key_string, triple).keySet()) {
 				if (first) {
 					first = false;
 				} else {
 					row_key += ",";
 				}
-				row_key += getInputValue(row_key_string, triple).get(key);
+				row_key += this.getInputValue(row_key_string, triple).get(key);
 			}
 
 			String column = "";
 			first = true;
-			for (Integer key : getInputValue(column_name_string, triple)
+			for (final Integer key : this.getInputValue(column_name_string, triple)
 					.keySet()) {
 				if (first) {
 					first = false;
 				} else {
 					column += ",";
 				}
-				column += getInputValue(column_name_string, triple).get(key);
+				column += this.getInputValue(column_name_string, triple).get(key);
 			}
-			result.add(generateHBaseTriple(tablename, row_key, column, ""));
+			result.add(this.generateHBaseTriple(tablename, row_key, column, ""));
 		}
 		return result;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * lupos.cloud.hbase.HBaseDistributionStrategy#getInputValue(java.lang.String
 	 * , lupos.datastructures.items.Triple)
 	 */
-	public TreeMap<Integer, Object> getInputValue(String elements, Triple triple) {
-		TreeMap<Integer, Object> tm = new TreeMap<Integer, Object>();
-		int subject = elements.indexOf('S');
-		if (subject > -1)
+	@Override
+	public TreeMap<Integer, Object> getInputValue(final String elements, final Triple triple) {
+		final TreeMap<Integer, Object> tm = new TreeMap<Integer, Object>();
+		final int subject = elements.indexOf('s');
+		if (subject > -1) {
 			tm.put(subject, triple.getSubject());
-		int predicate = elements.indexOf('P');
-		if (predicate > -1)
+		}
+		final int predicate = elements.indexOf('p');
+		if (predicate > -1) {
 			tm.put(predicate, triple.getPredicate());
-		int object = elements.indexOf('O');
-		if (object > -1)
+		}
+		final int object = elements.indexOf('o');
+		if (object > -1) {
 			tm.put(object, triple.getObject());
+		}
 		return tm;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * lupos.cloud.hbase.HBaseDistributionStrategy#generateHBaseTriple(java.
 	 * lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
+	@Override
 	public HBaseTriple generateHBaseTriple(final String tablename,
 			final String row_key, final String column, final String value) {
 		return new HBaseTriple(tablename, row_key, COLUMN_FAMILY, column, value);
@@ -131,7 +138,7 @@ public class HexaDistributionTableStrategy extends HBaseDistributionStrategy {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see lupos.cloud.hbase.HBaseDistributionStrategy#getColumnFamilyName()
 	 */
 	@Override
